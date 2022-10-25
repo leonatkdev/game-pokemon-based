@@ -9,6 +9,43 @@ console.log("context", context);
 canvas.width = 1024;
 canvas.height = 576;
 
+const collisionsMap = [];
+for (let i = 0; i < collisions.length; i += 70) {
+  collisionsMap.push(collisions.slice(i, 70 + i));
+}
+
+console.log("collisionsMap", collisionsMap);
+
+class Boundery {
+  static width = 48;
+  static height = 48;
+  constructor({ position }) {
+    this.position = position;
+    this.width = 48;
+    this.height = 48;
+  }
+
+  draw() {
+    canvas.fillStyle = "red";
+    context.fillRect(this.position.x, this.position.y, this.width, this.height);
+  }
+}
+
+const bounderies = [];
+
+collisionsMap.forEach((row, i) => {
+  row.forEach((symbol, j) => {
+    if(symbol === 1025)
+    bounderies.push(
+      new Boundery({
+        position: { x: j * Boundery.width, y: i * Boundery.height },
+      })
+    );
+  });
+});
+
+console.log('bounderies', bounderies)
+
 context.fillStyle = "white";
 context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -26,7 +63,7 @@ class Sprite {
     this.image = image;
   }
   draw() {
-    context.drawImage(this.image, this.position.x, this.position.y)
+    context.drawImage(this.image, this.position.x, this.position.y);
   }
 }
 
@@ -35,27 +72,27 @@ const background = new Sprite({
     x: -740,
     y: -600,
   },
-  image: image, 
+  image: image,
 });
 
 const keys = {
-  w:{
-    pressed: false
+  w: {
+    pressed: false,
   },
-  a:{
-    pressed: false
+  a: {
+    pressed: false,
   },
-  s:{
-    pressed: false
+  s: {
+    pressed: false,
   },
-  d:{
-    pressed: false
+  d: {
+    pressed: false,
   },
-}
+};
 
 function animate() {
   window.requestAnimationFrame(animate);
- background.draw() 
+  background.draw();
   context.drawImage(
     playerImage,
     0,
@@ -67,50 +104,58 @@ function animate() {
     playerImage.width / 4,
     playerImage.height
   );
-  if(key.w.pressed){
-    background.position.y = background.position.y - 5
+  if (keys.w.pressed && lastKey === "w") {
+    background.position.y += 3;
+  } else if (keys.a.pressed && lastKey === "a") {
+    background.position.x += 3;
+  } else if (keys.s.pressed && lastKey === "s") {
+    background.position.y -= 3;
+  } else if (keys.d.pressed && lastKey === "d") {
+    background.position.x -= 3;
   }
 }
 
 animate();
 
+let lastKey = "";
 window.addEventListener("keydown", (e) => {
   console.log("e");
   switch (e.key) {
     case "w":
-      keys.w.pressed = true
+      keys.w.pressed = true;
+      lastKey = "w";
       break;
     case "a":
-      keys.a.pressed = true
-    break;
+      keys.a.pressed = true;
+      lastKey = "a";
+      break;
     case "s":
-      keys.s.pressed = true
+      keys.s.pressed = true;
+      lastKey = "s";
       break;
     case "d":
-      keys.d.pressed = true
+      keys.d.pressed = true;
+      lastKey = "d";
       break;
   }
-  console.log('keys', keys)
 });
 
 window.addEventListener("keyup", (e) => {
-  console.log("e");
   switch (e.key) {
     case "w":
-      keys.w.pressed = false
+      keys.w.pressed = false;
       break;
     case "a":
-      keys.a.pressed = false
-    break;
+      keys.a.pressed = false;
+      break;
     case "s":
-      keys.s.pressed = false
+      keys.s.pressed = false;
       break;
     case "d":
-      keys.d.pressed = false
+      keys.d.pressed = false;
       break;
   }
-  console.log('keys', keys)
+  console.log("keys", keys);
 });
-
 
 console.log(canvas);
