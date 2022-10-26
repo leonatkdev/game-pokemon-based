@@ -30,13 +30,17 @@ class Boundery {
 }
 
 const bounderies = [];
+const offset = {
+  x: -740,
+    y: -600,
+}
 
 collisionsMap.forEach((row, i) => {
   row.forEach((symbol, j) => {
     if (symbol === 1025)
       bounderies.push(
         new Boundery({
-          position: { x: j * Boundery.width, y: i * Boundery.height },
+          position: { x: j * Boundery.width + offset.x, y: i * Boundery.height + offset.y },
         })
       );
   });
@@ -131,16 +135,20 @@ function animate() {
   window.requestAnimationFrame(animate);
   background.draw();
   player.draw();
-  bounderies.forEach(boundery);
+  bounderies.forEach((boundery) => {
+    boundery.draw();
 
-  if (
-    player.position.x + player.width >= testBoundery.position.x &&
-    player.position.x <= testBoundery.position.x + testBoundery.width &&
-    player.position.y <= testBoundery.position.y + testBoundery.height &&
-    player.position.y + player.height >= testBoundery.position.y
-  ) {
-    console.log("collading");
-  }
+    if (
+      rectangularCollisions({
+        rectangle1: player,
+        rectangle2: boundery,
+      })
+    ) {
+      console.log('collliding');
+    }
+  });
+
+
 
   if (keys.w.pressed && lastKey === "w") {
     movable.forEach((movable) => {
