@@ -14,8 +14,6 @@ for (let i = 0; i < collisions.length; i += 70) {
   collisionsMap.push(collisions.slice(i, 70 + i));
 }
 
-console.log("collisionsMap", collisionsMap);
-
 class Boundery {
   static width = 48;
   static height = 48;
@@ -35,16 +33,14 @@ const bounderies = [];
 
 collisionsMap.forEach((row, i) => {
   row.forEach((symbol, j) => {
-    if(symbol === 1025)
-    bounderies.push(
-      new Boundery({
-        position: { x: j * Boundery.width, y: i * Boundery.height },
-      })
-    );
+    if (symbol === 1025)
+      bounderies.push(
+        new Boundery({
+          position: { x: j * Boundery.width, y: i * Boundery.height },
+        })
+      );
   });
 });
-
-console.log('bounderies', bounderies)
 
 context.fillStyle = "white";
 context.fillRect(0, 0, canvas.width, canvas.height);
@@ -52,20 +48,39 @@ context.fillRect(0, 0, canvas.width, canvas.height);
 const image = new Image();
 image.src = "./img/Pellet Town.png";
 
-console.log("image", image);
 const playerImage = new Image();
 
 playerImage.src = "./img/playerDown.png";
 
 class Sprite {
-  constructor({ position, velocity, image }) {
+  constructor({ position, velocity, image, frames = { max: 1 } }) {
     this.position = position;
     this.image = image;
+    this.frames = frames;
+    this.image.onload = () => {
+      this.width = this.image.width / this.frames.max;
+      this.height = this.image.height;
+      console.log("this.width", this.width);
+      console.log("this.height", this.height);
+    };
   }
   draw() {
-    context.drawImage(this.image, this.position.x, this.position.y);
+    context.drawImage(
+      this.image,
+      0,
+      0,
+      this.image.width / this.frames.max,
+      this.image.height,
+      this.position.x,
+      this.position.y,
+      this.image.width / this.frames.max,
+      this.image.height
+    );
   }
 }
+
+// canvas.width / 2 - this.image.width / 4 / 2,
+// canvas.height / 2 - this.image.height / 2,
 
 const background = new Sprite({
   position: {
@@ -73,6 +88,17 @@ const background = new Sprite({
     y: -600,
   },
   image: image,
+});
+
+const player = new Sprite({
+  position: {
+    x: canvas.width / 2 - 192 / 4 / 2,
+    y: canvas.height / 2 - 68 / 2,
+  },
+  image: playerImage,
+  frames: {
+    max: 4,
+  },
 });
 
 const keys = {
@@ -90,28 +116,48 @@ const keys = {
   },
 };
 
+const movable = [background, ...bounderies];
+
+function rectangularCollisions({ rectangle1, rectangle2 }) {
+  return (
+    rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+    rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
+    rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
+    rectangle1.position.y + rectangle1.height >= rectangle2.position.y
+  );
+}
+
 function animate() {
   window.requestAnimationFrame(animate);
   background.draw();
-  context.drawImage(
-    playerImage,
-    0,
-    0,
-    playerImage.width / 4,
-    playerImage.height,
-    canvas.width / 2 - playerImage.width / 4 / 2,
-    canvas.height / 2 - playerImage.height / 2,
-    playerImage.width / 4,
-    playerImage.height
-  );
+  player.draw();
+  bounderies.forEach(boundery);
+
+  if (
+    player.position.x + player.width >= testBoundery.position.x &&
+    player.position.x <= testBoundery.position.x + testBoundery.width &&
+    player.position.y <= testBoundery.position.y + testBoundery.height &&
+    player.position.y + player.height >= testBoundery.position.y
+  ) {
+    console.log("collading");
+  }
+
   if (keys.w.pressed && lastKey === "w") {
-    background.position.y += 3;
+    movable.forEach((movable) => {
+      movable.position.y += 3;
+    });
   } else if (keys.a.pressed && lastKey === "a") {
-    background.position.x += 3;
+    movable.forEach((movable) => {
+      movable.position.x += 3;
+    });
   } else if (keys.s.pressed && lastKey === "s") {
-    background.position.y -= 3;
+    movable.forEach((movable) => {
+      movable.position.y -= 3;
+    });
   } else if (keys.d.pressed && lastKey === "d") {
-    background.position.x -= 3;
+    movable.forEach((movable) => {
+      movable.position.x -= 3;
+    });
   }
 }
 
@@ -119,7 +165,6 @@ animate();
 
 let lastKey = "";
 window.addEventListener("keydown", (e) => {
-  console.log("e");
   switch (e.key) {
     case "w":
       keys.w.pressed = true;
@@ -155,7 +200,4 @@ window.addEventListener("keyup", (e) => {
       keys.d.pressed = false;
       break;
   }
-  console.log("keys", keys);
 });
-
-console.log(canvas);
