@@ -14,22 +14,8 @@ for (let i = 0; i < collisions.length; i += 70) {
   collisionsMap.push(collisions.slice(i, 70 + i));
 }
 
-class Boundery {
-  static width = 48;
-  static height = 48;
-  constructor({ position }) {
-    this.position = position;
-    this.width = 48;
-    this.height = 48;
-  }
-
-  draw() {
-    context.fillStyle = 'rgba(255, 0, 0, 0.0)';
-    context.fillRect(this.position.x, this.position.y, this.width, this.height);
-  }
-}
-
 const bounderies = [];
+
 const offset = {
   x: -740,
   y: -600,
@@ -55,41 +41,26 @@ context.fillRect(0, 0, canvas.width, canvas.height);
 const image = new Image();
 image.src = "./img/Pellet Town.png";
 
+const foregroundImage = new Image();
+foregroundImage.src = "./img/foregroundObjects.png";
+
 const playerImage = new Image();
-
 playerImage.src = "./img/playerDown.png";
-
-class Sprite {
-  constructor({ position, velocity, image, frames = { max: 1 } }) {
-    this.position = position;
-    this.image = image;
-    this.frames = frames;
-    this.image.onload = () => {
-      this.width = this.image.width / this.frames.max;
-      this.height = this.image.height;
-    };
-  }
-  draw() {
-    context.drawImage(
-      this.image,
-      0,
-      0,
-      this.image.width / this.frames.max,
-      this.image.height,
-      this.position.x,
-      this.position.y,
-      this.image.width / this.frames.max,
-      this.image.height
-    );
-  }
-}
 
 const background = new Sprite({
   position: {
-    x: -740,
-    y: -600,
+    x: offset.x,
+    y: offset.y,
   },
   image: image,
+});
+
+const foreground = new Sprite({
+  position: {
+    x: offset.x,
+    y: offset.y,
+  },
+  image: foregroundImage,
 });
 
 const player = new Sprite({
@@ -118,7 +89,7 @@ const keys = {
   },
 };
 
-const movable = [background, ...bounderies];
+const movable = [background, foreground ,...bounderies];
 
 function rectangularCollisions({ rectangle1, rectangle2 }) {
   return (
@@ -133,12 +104,15 @@ function animate() {
   window.requestAnimationFrame(animate);
   background.draw();
   player.draw();
+  foreground.draw()
   bounderies.forEach((boundery) => {
     boundery.draw();
   });
   let moving = true;
+  player.moving = false;
 
   if (keys.w.pressed && lastKey === "w") {
+    player.moving = true
     for (let i = 0; i < bounderies.length; i++) {
       const boundery = bounderies[i];
       if (
@@ -162,6 +136,7 @@ function animate() {
         movable.position.y += 3;
       });
   } else if (keys.a.pressed && lastKey === "a") {
+    player.moving = true
     for (let i = 0; i < bounderies.length; i++) {
       const boundery = bounderies[i];
       if (
@@ -185,6 +160,7 @@ function animate() {
         movable.position.x += 3;
       });
   } else if (keys.s.pressed && lastKey === "s") {
+    player.moving = true
     for (let i = 0; i < bounderies.length; i++) {
       const boundery = bounderies[i];
       if (
@@ -208,6 +184,7 @@ function animate() {
         movable.position.y -= 3;
       });
   } else if (keys.d.pressed && lastKey === "d") {
+    player.moving = true
     for (let i = 0; i < bounderies.length; i++) {
       const boundery = bounderies[i];
       if (
